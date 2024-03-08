@@ -1,0 +1,25 @@
+# game rips
+export2
+GameAssets
+
+# programs
+DnSpy
+AssetRipper
+
+# private mods
+Warden
+
+# the mod manager (already open source)
+Mod Manager
+
+# offical GTTOD mod tools
+Mod-Tools
+Mod-Tools-main
+
+# other (mostly build artifacts)
+.git
+.vs
+bin
+obj
+packages
+*.png
