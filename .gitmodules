@@ -1,0 +1,19 @@
+[submodule "GTTOD Global Chat"]
+	path = GTTOD Global Chat
+	url = https://github.com/Aldin101/GTTOD-Global-Chat
+
+[submodule "K8Lib"]
+    path = K8Lib
+    url = https://github.com/Aldin101/K8Lib
+
+[submodule "K8Lib Examples"]
+    path = K8Lib Examples
+    url = https://github.com/Aldin101/K8Lib-Examples
+
+[submodule "MoreCommands"]
+    path = MoreCommands
+    url = https://github.com/Aldin101/MoreCommands
+
+[submodule "MoreCommands"]
+    path = MoreCommands
+    url = https://github.com/Aldin101/MoreCommands
