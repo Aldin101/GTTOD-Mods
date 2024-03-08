@@ -17,3 +17,7 @@
 [submodule "MoreCommands"]
     path = MoreCommands
     url = https://github.com/Aldin101/MoreCommands
+
+[submodule "GTTODModManager"]
+    path = Mod Manager
+    url = https://github.com/Aldin101/GTTODModManager
