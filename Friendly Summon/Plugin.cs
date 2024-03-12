@@ -12,12 +12,44 @@ namespace FriendlySummon
     {
 
         Sprite icon = null;
-        AssetBundle bundle = null;
 
         private void Awake()
         {
             Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
-            loadAssetBundle();
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Stream fileStream = assembly.GetManifestResourceStream("FriendlySummon.icon.sprite");
+
+            if (fileStream == null)
+            {
+                Logger.LogError("Failed to load resource stream");
+                return;
+            }
+
+            byte[] fieData = new byte[fileStream.Length];
+            fileStream.Read(fieData, 0, (int)fileStream.Length);
+            fileStream.Close();
+
+            string tempPath = Path.Combine(Application.temporaryCachePath, "icon.sprite");
+            File.WriteAllBytes(tempPath, fieData);
+
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(tempPath);
+
+            if (assetBundle == null)
+            {
+                Logger.LogError("Failed to load asset bundle");
+                return;
+            }
+
+            icon = assetBundle.LoadAsset<Sprite>("icon.sprite");
+
+            if (icon == null)
+            {
+                Logger.LogError("Failed to load sprite");
+                return;
+            }
+
+            File.Delete(tempPath);
         }
 
 
@@ -28,11 +60,6 @@ namespace FriendlySummon
 
         private void addInventoryItem()
         {
-            if (bundle == null || icon == null)
-            {
-                loadAssetBundle();
-                return;
-            }
             InventoryManager.InventoryIcon inventoryItem = new InventoryManager.InventoryIcon("friendlySummon", "SUMMON FIRENDLY ENEMY", "SUMMON A GOOD BOY", -1, icon, onGridClick);
         }
 
@@ -52,43 +79,6 @@ namespace FriendlySummon
                 hud.CenterPopUp("A " + upgrades.QueenOfWandsSummons[num].EnemyName + " HAS BEEN SUMMONED", 18, 2f);
                 Object.Instantiate<GameObject>(upgrades.QueenOfWandsSummons[num].GenericSpawn, closestSpawn.position, closestSpawn.rotation);
             }
-        }
-
-        private void loadAssetBundle()
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            Stream fileStream = assembly.GetManifestResourceStream("FriendlySummon.icon.sprite");
-
-            if (fileStream == null)
-            {
-                Logger.LogError("Failed to load resource stream");
-                return;
-            }
-
-            byte[] fieData = new byte[fileStream.Length];
-            fileStream.Read(fieData, 0, (int)fileStream.Length);
-            fileStream.Close();
-
-            string tempPath = Path.Combine(Application.temporaryCachePath, "icon.sprite");
-            File.WriteAllBytes(tempPath, fieData);
-
-            bundle = AssetBundle.LoadFromFile(tempPath);
-
-            if (bundle == null)
-            {
-                Logger.LogError("Failed to load asset bundle");
-                return;
-            }
-
-            icon = bundle.LoadAsset<Sprite>("icon.sprite");
-
-            if (icon == null)
-            {
-                Logger.LogError("Failed to load sprite");
-                return;
-            }
-
-            File.Delete(tempPath);
         }
     }
 }

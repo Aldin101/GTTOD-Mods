@@ -29,6 +29,7 @@ namespace RemoveCavityLines
             if (main == null || weapon == null)
             {
                 CavityBlitter[] cavities = FindObjectsOfType<CavityBlitter>();
+                if (cavities.Length < 2) return;
                 main = cavities[0];
                 weapon = cavities[1];
             }

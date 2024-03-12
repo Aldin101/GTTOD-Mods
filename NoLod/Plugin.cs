@@ -16,6 +16,8 @@ namespace NoLod
     {
         private ConfigEntry<bool> enabled;
         private ConfigEntry<bool> summit;
+        private string lastScene = "";
+        GTTOD_LevelSegment[] segments = FindObjectsOfType<GTTOD_LevelSegment>();
 
         private void Awake()
         {
@@ -34,7 +36,13 @@ namespace NoLod
                     K8stuff();
                     return;
                 }
-                GTTOD_LevelSegment[] segments = FindObjectsOfType<GTTOD_LevelSegment>();
+
+                if (lastScene != SceneManager.GetActiveScene().name)
+                {
+                    lastScene = SceneManager.GetActiveScene().name;
+                    segments = FindObjectsOfType<GTTOD_LevelSegment>();
+                }
+
                 foreach (GTTOD_LevelSegment segment in segments)
                 {
                     foreach (GameObject toggleObject in segment.ToggleObjects)
@@ -51,8 +59,8 @@ namespace NoLod
             new SettingsManager.SettingsElement.TitleBar("noLodTitle", "NO LOD");
             new SettingsManager.SettingsElement.CheckBox("noLodEnabled", "ENABLED", enabled.Value, onToggle);
             new SettingsManager.SettingsElement.CheckBox("noLodSummit", "ENABLED ON THE SUMMIT", summit.Value, onSummitToggle);
-            //new ConsoleCommand("perftest", perfTest);
-            new ConsoleCommand("pluginperftest", pluginPerfTest);
+            new ConsoleCommand("lodtest", perfTest);
+            new ConsoleCommand("plugintest", pluginPerfTest);
         }
 
         private void onToggle(bool value)
