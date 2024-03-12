@@ -46,10 +46,10 @@ namespace FasterMods
     public class ModManagerUnpackPatch
     {
         public static int modsLoaded;
+        public static List<AssetBundle> modAssetBundles = new List<AssetBundle>();
 
         public static bool Prefix(GTTOD_ModManager __instance)
         {
-            // Disable the original method
             return false;
         }
 
@@ -57,35 +57,33 @@ namespace FasterMods
         {
             modsLoaded = 0;
 
-            // Unload all asset bundles
-            AssetBundle.UnloadAllAssetBundles(true);
-            // Start a separate coroutine for each mod
+            foreach (var bundle in modAssetBundles)
+            {
+                bundle.Unload(true);
+            }
+            modAssetBundles.Clear();
+
             List<Coroutine> coroutines = new List<Coroutine>();
             foreach (GTTODMod Mod in __instance.Mods)
             {
                 coroutines.Add(__instance.StartCoroutine(UnpackModAsync(__instance, Mod)));
             }
 
-            // Start a coroutine that waits for all the UnpackModAsync coroutines to finish
             __instance.StartCoroutine(WaitForAllMods(__instance, coroutines));
         }
 
         private static IEnumerator WaitForAllMods(GTTOD_ModManager instance, List<Coroutine> coroutines)
         {
-            // Wait for all the UnpackModAsync coroutines to finish
             foreach (Coroutine coroutine in coroutines)
             {
                 yield return coroutine;
             }
 
-            // Check if all mods have been loaded
             var hudManager = AccessTools.Field(typeof(GTTOD_ModManager), "HUDManager").GetValue(instance);
             if (AllModsLoaded(instance.Mods))
             {
                 AccessTools.Method(hudManager.GetType(), "GlobalPopUp").Invoke(hudManager, new object[] { "MODS FULLY UNPACKED, RUNNING MODS", 27, 5f });
-                // Use AccessTools to get the RunMods method
                 var runMods = AccessTools.Method(typeof(GTTOD_ModManager), "RunMods");
-                // Use AccessTools to start the RunMods coroutine
                 instance.StartCoroutine((IEnumerator)runMods.Invoke(instance, null));
             }
         }
@@ -96,7 +94,6 @@ namespace FasterMods
             var hudManager = AccessTools.Field(typeof(GTTOD_ModManager), "HUDManager").GetValue(instance);
             string Path = Mod.GTTODModPath;
 
-            //AssetBundle BundleToLoad = AssetBundle.LoadFromFile(Path);
 
             AssetBundleCreateRequest BundleToLoadRequest = AssetBundle.LoadFromFileAsync(Path);
             yield return BundleToLoadRequest;
@@ -104,9 +101,9 @@ namespace FasterMods
             AssetBundle BundleToLoad = BundleToLoadRequest.assetBundle;
             if (BundleToLoad != null)
             {
+                modAssetBundles.Add(BundleToLoad);
                 string[] array = Path.Split('\\', (char)StringSplitOptions.None);
 
-                //GameObject gameObject = BundleToLoad.LoadAsset<GameObject>(array[array.Length - 1].ToString());
                 AssetBundleRequest assetRequest = BundleToLoad.LoadAssetAsync<GameObject>(array[array.Length - 1].ToString());
                 BundleToLoad.LoadAssetAsync(array[array.Length - 1].ToString(), typeof(GameObject));
 
