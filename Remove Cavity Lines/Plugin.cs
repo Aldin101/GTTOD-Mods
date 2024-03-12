@@ -13,6 +13,9 @@ namespace RemoveCavityLines
         // Config
         private ConfigEntry<bool> enabled;
 
+        CavityBlitter main = null;
+        CavityBlitter weapon = null;
+
         private void Awake()
         {
             Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
@@ -23,13 +26,15 @@ namespace RemoveCavityLines
 
         private void Update()
         {
-            if (enabled.Value)
+            if (main == null || weapon == null)
             {
-                foreach (var cavity in FindObjectsOfType<CavityBlitter>())
-                {
-                    cavity.enabled = false;
-                }
+                CavityBlitter[] cavities = FindObjectsOfType<CavityBlitter>();
+                main = cavities[0];
+                weapon = cavities[1];
             }
+
+            main.enabled = !enabled.Value;
+            weapon.enabled = !enabled.Value;
 
             addSettings();
         }
@@ -42,12 +47,6 @@ namespace RemoveCavityLines
         
         public void onToggle(bool value)
         {
-            if (value == false)
-            {
-                GTTOD_HUD hud = FindObjectOfType<GTTOD_HUD>();
-                hud.CenterPopUp("You need to restart the game for this change to take effect.", 20);
-            }
-
             enabled.Value = value;
             Config.Save();
         }

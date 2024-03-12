@@ -35,7 +35,6 @@ namespace FloorIsLava
                 || controller.CharacterGroundState == ac_CharacterController.GroundState.Sliding
                 || controller.CharacterGroundState == ac_CharacterController.GroundState.Swimming;
 
-
             if (isGrounded && enabled.Value)
             {
                 if (burning.Value)
