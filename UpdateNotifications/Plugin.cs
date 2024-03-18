@@ -65,7 +65,10 @@ namespace UpdateNotifications
                     if (File.Exists(mod.VersionInfoFile))
                     {
                         string version = FileVersionInfo.GetVersionInfo(mod.VersionInfoFile).FileVersion;
-                        if (version != mod.Version)
+                        if (mod.Deprecated)
+                        {
+                            hud.GlobalPopUp(mod.Name.ToUpper() + " IS DEPRECATED! PLEASE UNINSTALL IT!", 20, 10f);
+                        } else if (version != mod.Version)
                         {
                             hud.GlobalPopUp(mod.Name.ToUpper() + " IS OUT OF DATE! CURRENT VERSION: " + mod.Version + " YOUR VERSION: " + version, 20, 10f);
                         } else upToDateCount++;
@@ -93,6 +96,7 @@ namespace UpdateNotifications
         public List<string> Files { get; set; }
         public string VersionInfoFile { get; set; }
         public string MoreInfoLink { get; set; }
+        public bool Deprecated { get; set; }
     }
 
     public class ModCategory
