@@ -1,6 +1,9 @@
 # game rips
 export2
 GameAssets
+GameAssets - Copy
+GameAssetsShaders
+GameAssetsShaders - Copy
 
 # programs
 DnSpy
@@ -10,10 +13,12 @@ AssetRipper
 Warden
 SceneLoadTest
 Escape The Shatter
+GTTRD
 
 # offical GTTOD mod tools
 Mod-Tools
 Mod-Tools-main
+Mod-Tools-main - Copy
 
 # other (mostly build artifacts)
 .git
@@ -22,3 +27,4 @@ bin
 obj
 packages
 *.png
+FixPluginTypesSerialization-master
