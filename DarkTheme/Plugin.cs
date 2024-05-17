@@ -2,11 +2,12 @@
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using K8Lib;
+using K8Lib.Settings;
 
 namespace DarkTheme
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    [BepInDependency("K8Lib")]
     public class DarkTheme : BaseUnityPlugin
     {
         private ConfigEntry<bool> darkThemeEnabled;
@@ -30,15 +31,10 @@ namespace DarkTheme
             harmony.UnpatchSelf();
         }
 
-        private void Update()
+        private void Start()
         {
-            addSettings();
-        }
-
-        private void addSettings()
-        {
-            SettingsManager.SettingsElement.TitleBar titleBar = new SettingsManager.SettingsElement.TitleBar("DarkTheme", "DARK THEME");
-            SettingsManager.SettingsElement.CheckBox toggle = new SettingsManager.SettingsElement.CheckBox("DarkThemeCheckBox", "ENABLED", darkThemeEnabled.Value, onToggle);
+             new TitleBar("DarkTheme", "DARK THEME");
+             new CheckBox("DarkThemeCheckBox", "ENABLED", darkThemeEnabled.Value, onToggle);
         }
 
         public void onToggle(bool value)

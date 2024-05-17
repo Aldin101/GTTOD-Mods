@@ -7,10 +7,10 @@ using System.IO;
 using System.Reflection;
 using UnityEngine.SceneManagement;
 
-namespace InvisHands
+namespace OutlineOnlyWeapons
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
-    public class InvisHands : BaseUnityPlugin
+    public class OutlineOnlyWeapons : BaseUnityPlugin
     {
         AssetBundle bundle;
         Shader shader;
@@ -18,10 +18,10 @@ namespace InvisHands
 
         private void Awake()
         {
-            Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
 
             var assembly = Assembly.GetExecutingAssembly();
-            using (var stream = assembly.GetManifestResourceStream("InvisHands.invishands"))
+            using (var stream = assembly.GetManifestResourceStream("OutlineOnlyWeapons.shaderBundle"))
             {
                 if (stream == null)
                 {

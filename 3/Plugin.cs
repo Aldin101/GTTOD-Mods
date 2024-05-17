@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using HarmonyLib;
 using BepInEx;
 using BepInEx.Configuration;
-using K8Lib;
+using K8Lib.Settings;
 
 namespace three
 {
@@ -20,13 +20,20 @@ namespace three
             enabled = Config.Bind("Settings", "Enabled", true, "Enable the plugin");
             replacementString = Config.Bind("Settings", "Replacement String", ":3", "The text to replace all text with");
 
-            Debug.Log($"Plugin {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Debug.Log($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
             if (enabled.Value)
             {
                 var harmony = new Harmony(PluginInfo.PLUGIN_GUID);
                 harmony.PatchAll();
             }
         }
+        private void Start()
+        {
+            new TitleBar("3TitleBar", ":3");
+            new CheckBox("3Enabled", "ENABLED", enabled.Value, onCheck);
+            new TextInput("3ReplacementString", "REPLACEMENT STRING", replacementString.Value, "BLANK (removes ingame text)", onReplacementStringChange);
+        }
+
         private void OnDestroy()
         {
             var harmony = new Harmony(PluginInfo.PLUGIN_GUID);
@@ -34,8 +41,6 @@ namespace three
         }
         private void Update()
         {
-            addSettings();
-            
             if (!enabled.Value) return;
 
             Text[] allText = FindObjectsOfType<Text>();
@@ -47,12 +52,7 @@ namespace three
 
             GTTOD_InteractionManager_InteractionUpdate.replacementString = replacementString.Value;
         }
-        private void addSettings()
-        {
-            new SettingsManager.SettingsElement.TitleBar("3TitleBar", ":3");
-            new SettingsManager.SettingsElement.CheckBox("3Enabled", "ENABLED", enabled.Value, onCheck);
-            new SettingsManager.SettingsElement.TextInput("3ReplacementString", "REPLACEMENT STRING", replacementString.Value, "BLANK (removes ingame text)", onReplacementStringChange);
-        }
+
 
         public void onCheck(bool enabled)
         {

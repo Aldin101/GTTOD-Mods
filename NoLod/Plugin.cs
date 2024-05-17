@@ -3,7 +3,8 @@ using UnityEngine.SceneManagement;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using K8Lib;
+using K8Lib.Settings;
+using K8Lib.Commands;
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
@@ -12,16 +13,18 @@ using System;
 namespace NoLod
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    [BepInDependency(K8Lib.PluginInfo.PLUGIN_GUID)]
     public class NoLod : BaseUnityPlugin
     {
         private ConfigEntry<bool> enabled;
         private ConfigEntry<bool> summit;
         private string lastScene = "";
         GTTOD_LevelSegment[] segments = FindObjectsOfType<GTTOD_LevelSegment>();
+        LODGroup[] groups = FindObjectsOfType<LODGroup>();
 
         private void Awake()
         {
-            Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
 
             enabled = Config.Bind("Settings", "Enabled", true, "Is No LOD active and enabled?");
             summit = Config.Bind("Settings", "Summit", true, "Is No LOD active and enabled on the summit?");
@@ -33,7 +36,6 @@ namespace NoLod
             {
                 if (SceneManager.GetActiveScene().name == "THE SUMMIT" && !summit.Value)
                 {
-                    K8stuff();
                     return;
                 }
 
@@ -41,6 +43,7 @@ namespace NoLod
                 {
                     lastScene = SceneManager.GetActiveScene().name;
                     segments = FindObjectsOfType<GTTOD_LevelSegment>();
+                    groups = FindObjectsOfType<LODGroup>();
                 }
 
                 foreach (GTTOD_LevelSegment segment in segments)
@@ -50,15 +53,19 @@ namespace NoLod
                         toggleObject.SetActive(true);
                     }
                 }
+
+                foreach (LODGroup group in groups)
+                {
+                    group.enabled = false;
+                }
             }
-            K8stuff();
         }
 
-        private void K8stuff()
+        private void Start()
         {
-            new SettingsManager.SettingsElement.TitleBar("noLodTitle", "NO LOD");
-            new SettingsManager.SettingsElement.CheckBox("noLodEnabled", "ENABLED", enabled.Value, onToggle);
-            new SettingsManager.SettingsElement.CheckBox("noLodSummit", "ENABLED ON THE SUMMIT", summit.Value, onSummitToggle);
+            new TitleBar("noLodTitle", "NO LOD");
+            new CheckBox("noLodEnabled", "ENABLED", enabled.Value, onToggle);
+            new CheckBox("noLodSummit", "ENABLED ON THE SUMMIT", summit.Value, onSummitToggle);
             new ConsoleCommand("lodtest", perfTest);
             new ConsoleCommand("plugintest", pluginPerfTest);
         }
@@ -82,22 +89,19 @@ namespace NoLod
 
         private IEnumerator pluginPerfTestCoroutine()
         {
-            GameObject bepInExManager = GameObject.Find("BepInEx_Manager");
+            GameObject bepInExManager = BepInEx.Bootstrap.Chainloader.ManagerObject.gameObject;
             GameManager.GM.gameObject.GetComponent<GTTOD_HUD>().CenterPopUp("STARTING PERFORMANCE TEST", 20, 3f);
 
             FileStream fileStream = File.Open("pluginPerfTest.txt", FileMode.Create);
             StreamWriter writer = new StreamWriter(fileStream);
             writer.WriteLine("Starting test");
 
-            // Get the baseline performance
             float baselinePerformance = 0f;
             yield return CalculateAverageFps(1f, averageFps => { baselinePerformance = averageFps; });
             writer.WriteLine($"Baseline Performance: {baselinePerformance}");
 
-            // Loop through all components of bepinex manager and remove them one by one, writing the performance to a file 1 second after each removal.
             foreach (Component component in bepInExManager.GetComponents<Component>())
             {
-                // Skip null, transform, K8Lib, and NoLod components
                 if (component == null || component is Transform || component is NoLod)
                 {
                     continue;
@@ -141,9 +145,6 @@ namespace NoLod
             callback(fpsSum / fpsCount);
         }
 
-
-
-
         private void perfTest(string unsued)
         {
             StartCoroutine(perfTestCoroutine());
@@ -164,7 +165,7 @@ namespace NoLod
 
             enabled.Value = false;
             SceneManager.LoadScene("AMBER VALE");
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(5f);
             off.Add((int)(1f / Time.deltaTime));
             enabled.Value = true;
             yield return new WaitForSeconds(1f);
@@ -172,7 +173,7 @@ namespace NoLod
 
             enabled.Value = false;
             SceneManager.LoadScene("FRACTURED RIDGE");
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(5f);
             off.Add((int)(1f / Time.deltaTime));
             enabled.Value = true;
             yield return new WaitForSeconds(1f);
@@ -180,7 +181,7 @@ namespace NoLod
 
             enabled.Value = false;
             SceneManager.LoadScene("THE SUMMIT");
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(5f);
             off.Add((int)(1f / Time.deltaTime));
             enabled.Value = true;
             yield return new WaitForSeconds(1f);

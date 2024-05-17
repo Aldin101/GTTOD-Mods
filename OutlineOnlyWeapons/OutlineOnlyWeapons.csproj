@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
-    <AssemblyName>InvisHands</AssemblyName>
+    <AssemblyName>OutlineOnlyWeapons</AssemblyName>
     <Description>Outlines are cool</Description>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="invishands" />
+    <EmbeddedResource Include="shaderBundle" />
   </ItemGroup>
 
   <ItemGroup>

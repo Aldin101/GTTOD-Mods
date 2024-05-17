@@ -2,7 +2,7 @@
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using K8Lib;
+using K8Lib.Settings;
 
 namespace FloorIsLava
 {
@@ -17,11 +17,28 @@ namespace FloorIsLava
 
         private void Awake()
         {
-            Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
 
             enabled = Config.Bind("Settings", "Enabled", true, "");
             burning = Config.Bind("Settings", "Burning", true, "Sets your on fire when you touch the floor, overrides damage value");
             damage = Config.Bind("Settings", "Damage", 3, "How much damage you take when you touch the floor");
+        }
+
+        private void Start()
+        {
+            new TitleBar("lava", "THE FLOOR IS LAVA");
+            new CheckBox("lavaEnabled", "ENABLED", enabled.Value, delegate (bool value)
+            {
+                enabled.Value = value;
+            });
+            new CheckBox("lavaBurning", "BURNING (overrides damage value below)", burning.Value, delegate (bool value)
+            {
+                burning.Value = value;
+            });
+            new Slider("lavaDamage", "DAMAGE", 1, 25, damage.Value, true, delegate (float value)
+            {
+                damage.Value = (int)value;
+            });
         }
 
         private void Update()
@@ -50,24 +67,6 @@ namespace FloorIsLava
                 }
             }
 
-            addSettings();
-        }
-
-        private void addSettings()
-        {
-            SettingsManager.SettingsElement.TitleBar titleBar = new SettingsManager.SettingsElement.TitleBar("lava", "THE FLOOR IS LAVA");
-            SettingsManager.SettingsElement.CheckBox enabledToggle = new SettingsManager.SettingsElement.CheckBox("lavaEnabled", "ENABLED", enabled.Value, delegate (bool value)
-            {
-                enabled.Value = value;
-            });
-            SettingsManager.SettingsElement.CheckBox burningToggle = new SettingsManager.SettingsElement.CheckBox("lavaBurning", "BURNING (overrides damage value below)", burning.Value, delegate (bool value)
-            {
-                burning.Value = value;
-            });
-            SettingsManager.SettingsElement.Slider damageSlider = new SettingsManager.SettingsElement.Slider("lavaDamage", "DAMAGE", damage.Value, 1, 25, true, delegate (float value)
-            {
-                damage.Value = (int)value;
-            });
         }
     }
 }

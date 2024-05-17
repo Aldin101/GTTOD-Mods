@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 using BepInEx;
 using BepInEx.Configuration;
 using System.Collections.Generic;
-using K8Lib;
+using K8Lib.Settings;
 
 namespace loop
 {
@@ -15,7 +14,7 @@ namespace loop
 
         private void Awake()
         {
-            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} V{PluginInfo.PLUGIN_VERSION} has loaded");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded");
 
             loopEnabled = Config.Bind("Settings", "LoopEnabled", true, "Enable or disable the loop feature");
         }
@@ -68,14 +67,12 @@ namespace loop
                     }
                 }
             }
-
-            addSettings();
         }
 
-        private void addSettings()
+        private void Start()
         {
-            SettingsManager.SettingsElement.TitleBar titleBar = new SettingsManager.SettingsElement.TitleBar("loopSettingsTitle", "LOOP");
-            SettingsManager.SettingsElement.CheckBox enabled = new SettingsManager.SettingsElement.CheckBox("loopSettingsToggle", "ENABLED", loopEnabled.Value, onEnableValueChange);
+            new TitleBar("loopSettingsTitle", "LOOP");
+            new CheckBox("loopSettingsToggle", "ENABLED", loopEnabled.Value, onEnableValueChange);
         }
 
         public void onEnableValueChange(bool value)

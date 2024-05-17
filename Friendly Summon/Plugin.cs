@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using BepInEx;
-using K8Lib;
+using K8Lib.Inventory;
 using System.Reflection;
 using System.IO;
 
@@ -10,57 +10,32 @@ namespace FriendlySummon
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class FriendlySummon : BaseUnityPlugin
     {
-
-        Sprite icon = null;
+        Sprite icon;
 
         private void Awake()
         {
-            Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
 
             Assembly assembly = Assembly.GetExecutingAssembly();
-            Stream fileStream = assembly.GetManifestResourceStream("FriendlySummon.icon.sprite");
-
-            if (fileStream == null)
+            using (var stream = assembly.GetManifestResourceStream("FriendlySummon.icon.sprite"))
             {
-                Logger.LogError("Failed to load resource stream");
-                return;
+                if (stream == null)
+                {
+                    Logger.LogError("Failed to load asset bundle");
+                    return;
+                }
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);
+                    icon = AssetBundle.LoadFromMemory(memoryStream.ToArray()).LoadAsset<Sprite>("icon.sprite");
+                }
             }
-
-            byte[] fieData = new byte[fileStream.Length];
-            fileStream.Read(fieData, 0, (int)fileStream.Length);
-            fileStream.Close();
-
-            string tempPath = Path.Combine(Application.temporaryCachePath, "icon.sprite");
-            File.WriteAllBytes(tempPath, fieData);
-
-            AssetBundle assetBundle = AssetBundle.LoadFromFile(tempPath);
-
-            if (assetBundle == null)
-            {
-                Logger.LogError("Failed to load asset bundle");
-                return;
-            }
-
-            icon = assetBundle.LoadAsset<Sprite>("icon.sprite");
-
-            if (icon == null)
-            {
-                Logger.LogError("Failed to load sprite");
-                return;
-            }
-
-            File.Delete(tempPath);
         }
 
-
-        private void Update()
+        private void Start()
         {
-            addInventoryItem();
-        }
-
-        private void addInventoryItem()
-        {
-            InventoryManager.InventoryIcon inventoryItem = new InventoryManager.InventoryIcon("friendlySummon", "SUMMON FIRENDLY ENEMY", "SUMMON A GOOD BOY", -1, icon, onGridClick);
+            new InventoryIcon("friendlySummon", "SUMMON FIRENDLY ENEMY", "SUMMON A GOOD BOY", null, icon, onGridClick);
         }
 
         private void onGridClick()

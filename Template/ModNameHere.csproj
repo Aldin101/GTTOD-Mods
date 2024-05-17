@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
-    <AssemblyName>DarkTheme</AssemblyName>
-    <Description>For all of you Discord mods</Description>
+    <AssemblyName>ModNameHere</AssemblyName>
+    <Description>Mod description here</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>

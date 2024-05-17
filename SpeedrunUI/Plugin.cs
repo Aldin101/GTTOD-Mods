@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using K8Lib;
+using K8Lib.Settings;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -22,7 +22,7 @@ namespace SpeedrunUI
 
         private void Awake()
         {
-            Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
 
             System.Globalization.CultureInfo culture = System.Globalization.CultureInfo.CurrentCulture;
             string region = culture.Name;
@@ -53,7 +53,6 @@ namespace SpeedrunUI
         {
             if (!GameManager.GM) return;
             GTTOD_HUD hud = GameManager.GM.GetComponent<GTTOD_HUD>();
-            addSettings();
             if (speedometer.Value)
             {
                 hud.Speedometer.SetActive(true);
@@ -101,13 +100,13 @@ namespace SpeedrunUI
             };
         }
 
-        void addSettings()
+        void Start()
         {
-            new SettingsManager.SettingsElement.TitleBar("SpeedrunUI", "SPEEDRUN UI");
-            new SettingsManager.SettingsElement.CheckBox("Speedometer", "ENABLE SPEEDOMETER", speedometer.Value, (value) => { speedometer.Value = value; Config.Save(); });
-            new SettingsManager.SettingsElement.CheckBox("Timer", "ENABLE TIMER", timer.Value, (value) => { timer.Value = value; Config.Save(); });
-            new SettingsManager.SettingsElement.CheckBox("EndOfLevelTimeNotif", "ENABLE END OF LEVEL TIME POPUP", endOfLevelTimeNotif.Value, (value) => { endOfLevelTimeNotif.Value = value; Config.Save(); });
-            new SettingsManager.SettingsElement.DropDown("unitsDropDown", "UNITS", new List<string> { "MPH", "KM/H" }, units.Value, (value) => { units.Value = value; Config.Save(); });
+            new TitleBar("SpeedrunUI", "SPEEDRUN UI");
+            new CheckBox("Speedometer", "ENABLE SPEEDOMETER", speedometer.Value, (value) => { speedometer.Value = value; Config.Save(); });
+            new CheckBox("Timer", "ENABLE TIMER", timer.Value, (value) => { timer.Value = value; Config.Save(); });
+            new CheckBox("EndOfLevelTimeNotif", "ENABLE END OF LEVEL TIME POPUP", endOfLevelTimeNotif.Value, (value) => { endOfLevelTimeNotif.Value = value; Config.Save(); });
+            new DropDown("unitsDropDown", "UNITS", new List<string> { "MPH", "KM/H" }, units.Value, (value) => { units.Value = value; Config.Save(); });
         }
     }
 

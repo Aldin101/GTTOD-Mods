@@ -3,6 +3,7 @@ using BepInEx;
 using K8Lib;
 using System.Reflection;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 namespace OldLogo
 {
@@ -14,7 +15,7 @@ namespace OldLogo
 
         private void Awake()
         {
-            Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
             loadAssetBundle();
         }
 
@@ -52,39 +53,22 @@ namespace OldLogo
                 bundle.Unload(false);
             }
 
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            Stream fileStream = assembly.GetManifestResourceStream("OldLogo.logo.sprite");
-
-            if (fileStream == null)
+            var assembly = Assembly.GetExecutingAssembly();
+            using (var stream = assembly.GetManifestResourceStream("OldLogo.logo.sprite"))
             {
-                Logger.LogError("Failed to load resource stream");
-                return;
+                if (stream == null)
+                {
+                    Logger.LogError("Failed to load asset bundle");
+                    return;
+                }
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);
+                    bundle = AssetBundle.LoadFromMemory(memoryStream.ToArray());
+                    logo = bundle.LoadAsset<Sprite>("logo.sprite");
+                }
             }
-
-            byte[] fieData = new byte[fileStream.Length];
-            fileStream.Read(fieData, 0, (int)fileStream.Length);
-            fileStream.Close();
-
-            string tempPath = Path.Combine(Application.temporaryCachePath, "logo.sprite");
-            File.WriteAllBytes(tempPath, fieData);
-
-            bundle = AssetBundle.LoadFromFile(tempPath);
-
-            if (bundle == null)
-            {
-                Logger.LogError("Failed to load asset bundle");
-                return;
-            }
-
-            logo = bundle.LoadAsset<Sprite>("logo.sprite");
-
-            if (logo == null)
-            {
-                Logger.LogError("Failed to load sprite");
-                return;
-            }
-
-            File.Delete(tempPath);
         }
     }
 }

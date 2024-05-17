@@ -1,14 +1,9 @@
 ﻿using UnityEngine;
 using BepInEx;
-using BepInEx.Configuration;
 using HarmonyLib;
-using K8Lib;
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using UnityEngine.SceneManagement;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace FasterMods
 {
@@ -18,7 +13,7 @@ namespace FasterMods
 
         private void Awake()
         {
-            Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
 
             var harmony = new Harmony(PluginInfo.PLUGIN_GUID);
             harmony.PatchAll();
@@ -72,6 +67,8 @@ namespace FasterMods
             __instance.StartCoroutine(WaitForAllMods(__instance, coroutines));
         }
 
+
+
         private static IEnumerator WaitForAllMods(GTTOD_ModManager instance, List<Coroutine> coroutines)
         {
             foreach (Coroutine coroutine in coroutines)
@@ -82,12 +79,11 @@ namespace FasterMods
             var hudManager = AccessTools.Field(typeof(GTTOD_ModManager), "HUDManager").GetValue(instance);
             if (AllModsLoaded(instance.Mods))
             {
-                AccessTools.Method(hudManager.GetType(), "GlobalPopUp").Invoke(hudManager, new object[] { "MODS FULLY UNPACKED, RUNNING MODS", 27, 5f });
+                GameManager.GM.GetComponent<GTTOD_HUD>().GlobalPopUp("MODS FULLY UNPACKED, RUNNING MODS", 27, 5f);
                 var runMods = AccessTools.Method(typeof(GTTOD_ModManager), "RunMods");
                 instance.StartCoroutine((IEnumerator)runMods.Invoke(instance, null));
             }
         }
-
 
         private static IEnumerator UnpackModAsync(GTTOD_ModManager instance, GTTODMod Mod)
         {
@@ -112,13 +108,19 @@ namespace FasterMods
                     if (assetRequest.progress == 1)
                     {
                         modsLoaded++;
-                        AccessTools.Method(hudManager.GetType(), "GlobalPopUp").Invoke(hudManager, new object[] { $"Mod loading progress: {modsLoaded}/{instance.Mods.Count}", 27, 5f });
+                        GameManager.GM.GetComponent<GTTOD_HUD>().GlobalPopUp($"MOD LOADING PROGRESS: {modsLoaded}/{instance.Mods.Count}", 27, 5f);
                         break;
                     }
                     yield return null;
                 }
-
+                
                 yield return assetRequest;
+
+                if (assetRequest.asset == null)
+                {
+                    GameManager.GM.GetComponent<GTTOD_HUD>().GlobalPopUp("WORKSHOP MOD FAILED TO LOAD, PLEASE CHECK INSTALLED MODS!", 24, 5f);
+                    yield break;
+                }
 
                 GameObject gameObject = assetRequest.asset as GameObject;
                 if (gameObject != null)

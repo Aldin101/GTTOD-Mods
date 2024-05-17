@@ -2,7 +2,7 @@
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using K8Lib;
+using K8Lib.Settings;
 
 namespace RemoveCavityLines
 {
@@ -18,7 +18,7 @@ namespace RemoveCavityLines
 
         private void Awake()
         {
-            Logger.LogInfo($"Loaded {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+            Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
 
             // Config
             enabled = Config.Bind("Settings", "enabled", true, "enables the plugin");
@@ -36,14 +36,12 @@ namespace RemoveCavityLines
 
             main.enabled = !enabled.Value;
             weapon.enabled = !enabled.Value;
-
-            addSettings();
         }
 
-        private void addSettings()
+        private void Start()
         {
-            new SettingsManager.SettingsElement.TitleBar("RemoveCavityLinestitle", "REMOVE CAVITY LINES");
-            new SettingsManager.SettingsElement.CheckBox("RemoveCavityLinesenabled", "ENABLED", enabled.Value, onToggle);
+            new TitleBar("RemoveCavityLinestitle", "REMOVE CAVITY LINES");
+            new CheckBox("RemoveCavityLinesenabled", "ENABLED", enabled.Value, onToggle);
         }
         
         public void onToggle(bool value)
