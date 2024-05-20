@@ -32,12 +32,10 @@ namespace NoLod
 
         private void Update()
         {
+            if (GameManager.GM == null) return;
             if (enabled.Value)
             {
-                if (SceneManager.GetActiveScene().name == "THE SUMMIT" && !summit.Value)
-                {
-                    return;
-                }
+                if (SceneManager.GetActiveScene().name == "THE SUMMIT" && !summit.Value) return;
 
                 if (lastScene != SceneManager.GetActiveScene().name)
                 {
@@ -46,17 +44,32 @@ namespace NoLod
                     groups = FindObjectsOfType<LODGroup>();
                 }
 
-                foreach (GTTOD_LevelSegment segment in segments)
+                if (segments != null)
                 {
-                    foreach (GameObject toggleObject in segment.ToggleObjects)
+                    if (segments.Length != 0)
                     {
-                        toggleObject.SetActive(true);
+                        foreach (GTTOD_LevelSegment segment in segments)
+                        {
+                            if (segment == null) continue;
+                            foreach (GameObject toggleObject in segment.ToggleObjects)
+                            {
+                                if (toggleObject == null) continue;
+                                toggleObject.SetActive(true);
+                            }
+                        }
                     }
                 }
 
-                foreach (LODGroup group in groups)
+                if (groups != null)
                 {
-                    group.enabled = false;
+                    if (groups.Length != 0)
+                    {
+                        foreach (LODGroup group in groups)
+                        {
+                            if (group == null) continue;
+                            group.enabled = false;
+                        }
+                    }
                 }
             }
         }
