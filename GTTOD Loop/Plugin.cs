@@ -8,7 +8,7 @@ namespace loop
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     [BepInDependency("K8Lib")]
-    public class Plugin : BaseUnityPlugin
+    public class Loop : BaseUnityPlugin
     {
         private ConfigEntry<bool> loopEnabled;
 
@@ -23,49 +23,16 @@ namespace loop
         {
             if (GameManager.GM == null) return;
 
-            GameObject GTTOD = GameObject.Find("GTTOD");
-            if (GTTOD == null) return;
-
-            GTTOD = GTTOD.transform.GetRoot().gameObject;
-
-            List<Rune> runes = GTTOD.GetComponent<GTTOD_UpgradesManager>().AttunementRunes;
-            if (runes == null) return;
-
-            List<string> generatedRun = GTTOD.GetComponent<GTTOD_Manager>().GeneratedRun;
+            List<string> generatedRun = GameManager.GM.GetComponent<GTTOD_Manager>().GeneratedRun;
             if (generatedRun == null) return;
 
             if (loopEnabled.Value)
             {
-                if (!runes[0].RuneActive)
-                {
-                    if (generatedRun.Count == 12)
-                    {
-                        generatedRun.RemoveAt(11);
-                    }
-                }
-                else
-                {
-                    if (generatedRun.Count == 19)
-                    {
-                        generatedRun.RemoveAt(18);
-                    }
-                }
+                if (generatedRun.Contains("THE SUMMIT")) generatedRun.Remove("THE SUMMIT");
             } else
             {
-                if (!runes[0].RuneActive)
-                {
-                    if (generatedRun.Count == 11)
-                    {
-                        generatedRun.Add("THE SUMMIT");
-                    }
-                }
-                else
-                {
-                    if (generatedRun.Count == 18)
-                    {
-                        generatedRun.Add("THE SUMMIT");
-                    }
-                }
+                if (!generatedRun.Contains("THE SUMMIT")) generatedRun.Add("THE SUMMIT");
+
             }
         }
 
