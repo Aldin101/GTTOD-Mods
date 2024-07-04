@@ -51,7 +51,6 @@ namespace FasterMods
         public static void Postfix(GTTOD_ModManager __instance)
         {
             modsLoaded = 0;
-
             foreach (var bundle in modAssetBundles)
             {
                 bundle.Unload(true);
@@ -83,6 +82,13 @@ namespace FasterMods
                 var runMods = AccessTools.Method(typeof(GTTOD_ModManager), "RunMods");
                 instance.StartCoroutine((IEnumerator)runMods.Invoke(instance, null));
             }
+            else
+            {
+                GameManager.GM.GetComponent<GTTOD_HUD>().GlobalPopUp("1 OR MORE MODS FAILED TO LOAD, ATTEMPTING MOD EXECUTION ANYWAYS", 24, 5f);
+                GameManager.GM.GetComponent<GTTOD_HUD>().GlobalPopUp("PLEASE CHECK YOUR INSTALLED WORKSHOP MODS", 0, 5f);
+                var runMods = AccessTools.Method(typeof(GTTOD_ModManager), "RunMods");
+                instance.StartCoroutine((IEnumerator)runMods.Invoke(instance, null));
+            }
         }
 
         private static IEnumerator UnpackModAsync(GTTOD_ModManager instance, GTTODMod Mod)
@@ -90,18 +96,38 @@ namespace FasterMods
             var hudManager = AccessTools.Field(typeof(GTTOD_ModManager), "HUDManager").GetValue(instance);
             string Path = Mod.GTTODModPath;
 
+            bool loadingFinished = false;
 
             AssetBundleCreateRequest BundleToLoadRequest = AssetBundle.LoadFromFileAsync(Path);
-            yield return BundleToLoadRequest;
+            
+            BundleToLoadRequest.completed += (AsyncOperation operation) =>
+            {
+                if (BundleToLoadRequest.assetBundle == null)
+                {
+                    GameManager.GM.GetComponent<GTTOD_HUD>().GlobalPopUp("WORKSHOP MOD FAILED TO LOAD, PLEASE CHECK INSTALLED MODS!", 24, 5f);
+                    modsLoaded++;
+                    BundleToLoadRequest = null;
+                }
+                loadingFinished = true;
+            };
+
+            while (!loadingFinished)
+            {
+                yield return null;
+            }
+
+            if (BundleToLoadRequest == null)
+            {
+                yield break;
+            }
 
             AssetBundle BundleToLoad = BundleToLoadRequest.assetBundle;
             if (BundleToLoad != null)
             {
                 modAssetBundles.Add(BundleToLoad);
                 string[] array = Path.Split('\\', (char)StringSplitOptions.None);
-
-                AssetBundleRequest assetRequest = BundleToLoad.LoadAssetAsync<GameObject>(array[array.Length - 1].ToString());
-                BundleToLoad.LoadAssetAsync(array[array.Length - 1].ToString(), typeof(GameObject));
+                AssetBundleRequest assetRequest = new AssetBundleRequest();
+                assetRequest = BundleToLoad.LoadAssetAsync<GameObject>(array[array.Length - 1].ToString());
 
                 while (!assetRequest.isDone)
                 {
