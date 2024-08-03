@@ -17,6 +17,7 @@ namespace GTTODRichPresence
     {
         DiscordRpcClient client;
         float timeSinceLastUpdate = 0f;
+        System.DateTime startTime;
 
         private void Awake()
         {
@@ -47,6 +48,8 @@ namespace GTTODRichPresence
             });
 
             Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+
+            startTime = System.DateTime.UtcNow;
         }
 
         private void OnDestroy()
@@ -83,7 +86,6 @@ namespace GTTODRichPresence
                 smallImageText = GameManager.GM.GetComponent<GTTOD_Manager>().SessionKills + " Enemies Killed";
             }
 
-
             client.SetPresence(new RichPresence()
             {
                 Details = details,
@@ -93,6 +95,10 @@ namespace GTTODRichPresence
                     LargeImageKey = "logo",
                     SmallImageKey = "enemies_killed",
                     SmallImageText = smallImageText,
+                },
+                Timestamps = new Timestamps()
+                {
+                    Start = startTime
                 }
             });
         }
