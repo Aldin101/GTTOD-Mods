@@ -6,19 +6,26 @@ using K8Lib;
 using System.IO;
 using System.Reflection;
 using UnityEngine.SceneManagement;
+using K8Lib.Settings;
 
 namespace OutlineOnlyWeapons
 {
+    [BepInDependency(K8Lib.PluginInfo.PLUGIN_GUID)]
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class OutlineOnlyWeapons : BaseUnityPlugin
     {
         AssetBundle bundle;
         Shader shader;
         GameObject sway;
+        bool hasApplied = false;
+
+        ConfigEntry<bool> on;
 
         private void Awake()
         {
             Logger.LogInfo($"{PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION} has loaded!");
+
+            on = Config.Bind("Settings", "Enabled", true, "Enable the plugin");
 
             var assembly = Assembly.GetExecutingAssembly();
             using (var stream = assembly.GetManifestResourceStream("OutlineOnlyWeapons.shaderBundle"))
@@ -37,6 +44,18 @@ namespace OutlineOnlyWeapons
             }
         }
 
+        private void Start()
+        {
+            new TitleBar("OutlineOnlyWeapons", "OUTLINE ONLY WEAPONS");
+            new CheckBox("OOWEnabled", "ENABLED", on.Value, onCheckBoxChange);
+        }
+
+        void onCheckBoxChange(bool value)
+        {
+            on.Value = value;
+            Config.Save();
+        }
+
         private void loadShader()
         {
             SceneManager.LoadScene("reference", LoadSceneMode.Additive);
@@ -53,9 +72,17 @@ namespace OutlineOnlyWeapons
         {
             if (GameManager.GM == null) return;
             if (shader == null) loadShader();
-            if (sway == null) sway = GameObject.Find("SwayParent");
-            foreach (Renderer renderer in sway.GetComponentsInChildren<SkinnedMeshRenderer>())
+            if (sway == null) sway = GameObject.Find("WeaponParent");
+
+            if (!on.Value)
             {
+                if (!hasApplied) return;
+                shader = Shader.Find("Standard");
+            }
+
+            foreach (Renderer renderer in sway.GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer.GetType() == typeof(ParticleSystemRenderer)) continue;
                 foreach (Material material in renderer.materials)
                 {
                     material.shader = shader;
@@ -65,8 +92,9 @@ namespace OutlineOnlyWeapons
                     material.shader = shader;
                 }
             }
-            foreach (MeshRenderer renderer in sway.GetComponentsInChildren<MeshRenderer>())
+            foreach (Renderer renderer in FindObjectOfType<ac_BodyController>().gameObject.GetComponentsInChildren<Renderer>(true))
             {
+                if (renderer.GetType() == typeof(ParticleSystemRenderer)) continue;
                 foreach (Material material in renderer.materials)
                 {
                     material.shader = shader;
@@ -76,10 +104,12 @@ namespace OutlineOnlyWeapons
                     material.shader = shader;
                 }
             }
-            foreach (AmmoCounter counter in sway.GetComponentsInChildren<AmmoCounter>())
+            foreach (AmmoCounter counter in sway.GetComponentsInChildren<AmmoCounter>(true))
             {
-                counter.gameObject.SetActive(false);
+                counter.gameObject.SetActive(!on.Value);
             }
+            hasApplied = true;
+            if (!on.Value) hasApplied = false;
         }
     }
 }
