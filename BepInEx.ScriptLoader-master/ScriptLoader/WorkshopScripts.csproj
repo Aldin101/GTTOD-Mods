@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net46</TargetFramework>
+		<AssemblyName>WorkshopScripts</AssemblyName>
+		<Description>Allows for workshop mods to use custom scripts without a plugin</Description>
+		<Version>1.0.0</Version>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<DefineConstants>DEBUG</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<DefineConstants>RELEASE</DefineConstants>
+	</PropertyGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
+		<Exec Command="copy &quot;.\bin\Debug\net46\WorkshopScripts.dll&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\BepInEx\plugins&quot; /Y&#xD;&#xA;copy &quot;.\bin\Debug\net46\WorkshopScripts.pdb&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\BepInEx\plugins&quot; /Y&#xD;&#xA;start /B &quot;&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\Get To The Orange Door.exe&quot;" />
+	</Target>
+
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+		<PackageReference Include="BepInEx.Core" Version="5.*" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="UnityEngine.Modules" Version="2021.3.31" IncludeAssets="compile" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="mcs">
+			<HintPath>..\lib\mcs.dll</HintPath>
+		</Reference>
+		<Reference Include="GTTOD">
+			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\Get To The Orange Door_Data\Managed\Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="netstandard">
+			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\Get To The Orange Door_Data\Managed\netstandard.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\Get To The Orange Door_Data\Managed\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="K8Lib">
+			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\BepInEx\plugins\K8Lib.dll</HintPath>
+		</Reference>
+		<Reference Include="Steamworks">
+			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\Get To The Orange Door_Data\Managed\com.rlabrecque.steamworks.net.dll</HintPath>
+		</Reference>
+		<Reference Include="NavMeshComponents">
+			<HintPath>C:\Program Files (x86)\Steam\steamapps\common\Get To The Orange Door\Get To The Orange Door_Data\Managed\NavMeshComponents.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+</Project>
